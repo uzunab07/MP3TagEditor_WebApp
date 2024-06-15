@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Modify Metadata</title>
+</head>
+
+<body>
+    <div class="container mt-4 col-4">
+        <form action="/file_process" method="get">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" name="title" required>
+            </div>
+            <div class="form-group">
+                <label>Genre</label>
+                <input type="text" class="form-control" name="genre" required>
+            </div>
+            <div class="form-group">
+                <label>Artist</label>
+                <input type="text" class="form-control" name="artist" required>
+            </div>
+            <div class="form-group">
+                <label>Album</label>
+                <input type="album" class="form-control" name="album" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</body>
+
+</html>
