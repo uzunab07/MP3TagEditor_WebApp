@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify,send_from_directory
 import os
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TCON, TDRC
@@ -12,6 +12,7 @@ if not os.path.exists(UPLOADS_FOLDER):
 @app.route("/")
 def upload_form():
     return render_template("index.html")
+
 
 @app.route("/modify")
 def modify_form():
@@ -33,38 +34,37 @@ def upload_file():
 @app.route("/file_process", methods=["GET"])
 def process_file():
     metadata = {
-       'title': request.args.get('title'),
-       'album': request.args.get('album'),
-       'artist': request.args.get('artist'),
-       'genre': request.args.get('genre')
+        'title': request.args.get('title'),
+        'album': request.args.get('album'),
+        'artist': request.args.get('artist'),
+        'genre': request.args.get('genre')
     }
     # get the file name
-    
+
     file_name = os.listdir(UPLOADS_FOLDER)
     # file_path = "/"+UPLOADS_FOLDER+"/"+file_name
     file_path = os.path.join(UPLOADS_FOLDER, file_name[0])
-    
-    modify_metadata(file_path,metadata)
-    return jsonify({"metadata": metadata,
-                    "filename": file_name[0]}), 200
 
+    modify_metadata(file_path, metadata)
+    return render_template('modify.html',file_name=file_name), 200
 
 
 # TODO downloading the file
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(UPLOADS_FOLDER, filename, as_attachment=True)
+
 
 # TODO deleting the local file
 
 
-
-
-def modify_metadata(file,metadata):
+def modify_metadata(file, metadata):
     # Load the MP3 file
     audio = MP3(file, ID3=ID3)
 
     # Add ID3 tag if not present
     if audio.tags is None:
         audio.add_tags()
-
 
     # Modify metadata
     audio.tags.add(TIT2(encoding=3, text=metadata['title']))
@@ -74,10 +74,6 @@ def modify_metadata(file,metadata):
 
     # Save changes
     audio.save()
-    
-    print_metadata(file)
-    
-
 
 
 def print_metadata(file_path):
@@ -87,8 +83,6 @@ def print_metadata(file_path):
     # Print general audio information
     print(f"Length: {audio.info.length} seconds")
     print(f"Bitrate: {audio.info.bitrate} bps")
-
-
 
     # Load ID3 tags
     id3 = audio.tags

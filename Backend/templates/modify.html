@@ -9,7 +9,9 @@
 </head>
 
 <body>
+    
     <div class="container mt-4 col-4">
+        <h2>Modify Metadata</h2>
         <form action="/file_process" method="get">
             <div class="form-group">
                 <label>Title</label>
@@ -27,9 +29,29 @@
                 <label>Album</label>
                 <input type="album" class="form-control" name="album" required>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="d-flex">
+                <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+                <a id="download" class="btn btn-success ml-auto"> Download</a>
+            </div>
+            
         </form>
+        <br>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('download').addEventListener('click',function(event){
+            const fileName = '{{ file_name[0] }}';
+            window.location.href = '/download/' + fileName;
+
+        });
+        document.getElementById('submit').addEventListener('click',function(event){
+            downloadLink.style.display = 'inline-block';
+        })
+
+    </script>
 </body>
 
 </html>
