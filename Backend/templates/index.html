@@ -1,16 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .form-control,
+        .btn-primary {
+            display: block;
+            width: 100%;
+        }
+    </style>
     <title>Upload MP3</title>
 </head>
-<body>
-    <div class="container mt-4 col-6"></div>
-    <form id="uploadForm" method="post"  class="form-group"enctype="multipart/form-data" action="/upload">
-        <input type="file" id="mp3File" class="form-control" name="mp3File" accept=".mp3" required>
-        <button type="submit" class="btn btn-primary">Upload</button>
-    </form>
+
+<body class="container mt-4 col-3">
+
+    <div id="firstFrom">
+        <h2 class=" mt-4">Upload file</h2>
+        <form id="upload-form" class="form-group" enctype="multipart/form-data">
+            <div class="mb-3">
+                <input type="file" id="mp3File" class="form-control " name="mp3File" accept=".mp3" required>
+            </div>
+            <button type="submit" id="submit-btn" class="btn btn-primary">Upload</button>
+        </form>
+    </div>
+
+
+    <div id="modify-form" style="display: none;">
+        <h2 class=" mt-4">Modify Metadata</h2>
+        <form action="/file_process" method="get" class="form-group" >
+            <div class="mb-3" >
+                <label>Title</label>
+                <input type="text" class="form-control" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label>Genre</label>
+                <input type="text" class="form-control" name="genre" required>
+            </div>
+            <div class="mb-3">
+                <label>Artist</label>
+                <input type="text" class="form-control" name="artist" required>
+            </div>
+            <div class="mb-3">
+                <label>Album</label>
+                <input type="album" class="form-control" name="album" required>
+            </div>
+            <div class="d-flex">
+                <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+                <a id="download" class="btn btn-success ml-auto" style="display: none;"> Download</a>
+            </div>
+        </form>
+    </div>
+
 </body>
+
+<script>
+    $(document).ready(function () {
+        $("#download").click(function () {
+            {% if  file_name and file_name[0] %}
+            const fileName = '{{ file_name[0] }}';
+            $.ajax({
+                url: "/download/" + fileName,
+                type: "GET",
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data) {
+                    const url = window.URL.createObjectURL(new Blob([data]));
+                    const a = document.createElement('a');
+                    // Styling the element so it is not visible
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = fileName;
+                    // appending the newly created element in my webpage
+                    document.body.appendChild(a);
+                    // triggering the clicking automatically so the download will start
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    console.log("Download Completed");
+                },
+                error: function () {
+                    console.log("An error occured while downloading.")
+                }
+            })
+            {% endif %}
+        });
+        // Dsiplaying the downlaod button once the file has been proceced
+        $("#submit").click(function () {
+            $("#download").css("display", "inline-block");
+        });
+
+        // Displaying the form to modify the metedata once the file hads been uploaded
+        $("#upload-form").on("submit", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+            var formData = new FormData(this); // Create FormData object
+            $.ajax({
+                url: "/upload",
+                type: 'POST',
+                data: formData,
+                processData: false, // Prevent jQuery from automatically transforming the data into a query string
+                contentType: false, // Prevent jQuery from setting the content type
+                success: function (response) {
+                    $("#modify-form").css("display", "inline-block");
+                },
+                error: function (response) {
+                    alert("There is an error.");
+                }
+            })
+        });
+
+
+    });
+
+</script>
+
 </html>

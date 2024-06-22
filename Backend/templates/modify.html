@@ -6,10 +6,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <title>Modify Metadata</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#download").click(function () {
+                {% if  file_name and file_name[0] %}
+                const fileName = '{{ file_name[0] }}';
+                $.ajax({
+                    url: "/download/" + fileName,
+                    type: "GET",
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (data) {
+                        const url = window.URL.createObjectURL(new Blob([data]));
+                        const a = document.createElement('a');
+                        // Styling the element so it is not visible
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = fileName;
+                        // appending the newly created element in my webpage
+                        document.body.appendChild(a);
+                        // triggering the clicking automatically so the download will start
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        console.log("Download Completed");
+                    },
+                    error: function () {
+                        console.log("An error occured while downloading.")
+                    }
+                })
+                {% endif %}
+            });
+
+            $("#submit").click(function () {
+                $("#download").css("display", "inline-block");
+            })
+        })
+    </script>
 </head>
 
 <body>
-    
+
     <div class="container mt-4 col-4">
         <h2>Modify Metadata</h2>
         <form action="/file_process" method="get">
@@ -31,27 +69,14 @@
             </div>
             <div class="d-flex">
                 <button id="submit" type="submit" class="btn btn-primary">Submit</button>
-                <a id="download" class="btn btn-success ml-auto"> Download</a>
+                <a id="download" class="btn btn-success ml-auto" style="display: none;"> Download</a>
             </div>
-            
+
         </form>
         <br>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        document.getElementById('download').addEventListener('click',function(event){
-            const fileName = '{{ file_name[0] }}';
-            window.location.href = '/download/' + fileName;
-
-        });
-        document.getElementById('submit').addEventListener('click',function(event){
-            downloadLink.style.display = 'inline-block';
-        })
-
-    </script>
 </body>
 
 </html>

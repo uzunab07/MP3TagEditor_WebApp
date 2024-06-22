@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, jsonify,send_from_directory
+from flask import render_template, request, jsonify, send_from_directory, abort
 import os
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TCON, TDRC
@@ -21,10 +21,14 @@ def modify_form():
 
 @app.route("/upload", methods=['POST'])
 def upload_file():
-
+    if 'mp3File' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
     file = request.files['mp3File']
+
     file_path = os.path.join(UPLOADS_FOLDER, file.filename)
     file.save(file_path)
+    
+    # return render_template("index.html")
 
     return jsonify({"message": "File uploaded successfully"}), 200
 
@@ -46,12 +50,17 @@ def process_file():
     file_path = os.path.join(UPLOADS_FOLDER, file_name[0])
 
     modify_metadata(file_path, metadata)
-    return render_template('modify.html',file_name=file_name), 200
+    return render_template('modify.html', file_name=file_name), 200
 
 
 # TODO downloading the file
 @app.route('/download/<filename>')
 def download_file(filename):
+    # Security Check
+    file_path = os.path.join(UPLOADS_FOLDER, filename)
+    if not os.path.isfile(file_path):
+        abort
+
     return send_from_directory(UPLOADS_FOLDER, filename, as_attachment=True)
 
 
